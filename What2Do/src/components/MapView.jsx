@@ -1,9 +1,15 @@
 import React from "react";
-import { Link, useParams, useLocation } from "react-router-dom";
+import { Link, useParams, useLocation, useNavigate } from "react-router-dom";
 
 export const MapView = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const selectedActivities = location.state?.selectedOptions || [];
+
+  const handleViewItinerary = () => {
+    navigate('/itinerary', { state: { selectedActivities: selectedActivities } });
+  };
+
 
   return (
     // TODO
@@ -18,12 +24,11 @@ export const MapView = () => {
       >
         Back to Trips
       </Link>
-      <Link
-        to="/itinerary"
-        className="mt-4 inline-block bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-600"
-      >
+      <button
+        onClick={handleViewItinerary}
+        className="inline-block bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-600">
         View Itinerary
-      </Link>
+      </button>
       <div>
           <h2>Map Page</h2>
         
