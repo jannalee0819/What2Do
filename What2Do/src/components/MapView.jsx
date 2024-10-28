@@ -1,16 +1,16 @@
 import React from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useParams, useLocation } from "react-router-dom";
 
-export const MapView = ({ trips }) => {
-  const { id } = useParams();
-  const trip = trips[id];
+export const MapView = () => {
+  const location = useLocation();
+  const selectedActivities = location.state?.selectedOptions || [];
 
   return (
     // TODO
     <div className="p-6">
-      <h1 className="text-2xl font-bold mb-6">Trip Map - {trip?.location}</h1>
+      <h1 className="text-2xl font-bold mb-6">Trip Map</h1>
       <div className="bg-gray-200 h-96 rounded flex items-center justify-center">
-        <p>Map View Placeholder for {trip?.location}</p>
+        <p>Map View Placeholder</p>
       </div>
       <Link
         to="/"
@@ -18,6 +18,22 @@ export const MapView = ({ trips }) => {
       >
         Back to Trips
       </Link>
+      <div>
+          <h2>Map Page</h2>
+        
+          {selectedActivities.map((item, index) => (
+              <div key={index}>
+                  <h3>{item.activity}</h3>
+                  <ul>
+                      {item.selectedOptions.map((option, optIndex) => (
+                          <li key={optIndex}>{option}</li>
+                      ))}
+                  </ul>
+              </div>
+          ))}
+      </div>
     </div>
+    
+    
   );
 };

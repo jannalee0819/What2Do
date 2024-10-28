@@ -4,6 +4,7 @@ import { TripList } from "./components/TripList";
 import { AddTrip } from "./components/AddTrip";
 import { EditTrip } from "./components/EditTrip";
 import { MapView } from "./components/MapView";
+import { OptionsPage } from './pages/options/options';
 
 const App = () => {
   const [trips, setTrips] = useState([]);
@@ -28,7 +29,8 @@ const App = () => {
             path="/edit/:id"
             element={<EditTrip trips={trips} onUpdateTrip={updateTrip} />}
           />
-          <Route path="/map/:id" element={<MapView trips={trips} />} />
+          <Route path="/map" element={<MapView />} />
+          <Route path="/options" element={<OptionsPage />} />
         </Routes>
       </div>
     </BrowserRouter>

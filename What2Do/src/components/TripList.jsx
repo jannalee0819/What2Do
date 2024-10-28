@@ -73,10 +73,10 @@ export const TripList = ({ trips }) => {
             </div>
             <div className="mt-4 space-x-2">
               <Link
-                to={`/map/${index}`}
+                to={`/options`}
                 className="text-blue-500 hover:underline"
               >
-                View Map
+                Generate Options
               </Link>
               <Link
                 to={`/edit/${index}`}
