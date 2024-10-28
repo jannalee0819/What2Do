@@ -2,13 +2,12 @@ import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Clock, MapPin, Footprints } from 'lucide-react';
 
-export const TripItinerary = () => {
-    const location = useLocation();
-    const selectedActivities = location.state?.selectedActivities || [];
+export const TripItinerary = ({trip}) => {
+    // const location = useLocation();
+    // const selectedActivities = location.state?.selectedActivities || [];
 
   return (
-    <div className="flex flex-col items-center justify-center gap-4">
-      <div id="itinerary-card" className="w-full max-w-3xl mx-auto bg-white rounded-lg shadow-lg">
+      <div id="itinerary-card" className="w-full mx-auto bg-white rounded-lg shadow-lg mt-8">
         <div className="bg-white px-6 py-4 rounded-t-lg">
           <h1 className="text-2xl font-bold">Trip Itinerary</h1>
         </div>
@@ -24,7 +23,7 @@ export const TripItinerary = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200 bg-white">
-              {selectedActivities.map((item, key) => (
+              {trip.map((item, key) => (
                     <React.Fragment key={key}>
                     <tr className="hover:bg-gray-50">
                         <td className="px-6 py-4 text-sm text-gray-900">
@@ -60,13 +59,12 @@ export const TripItinerary = () => {
           </div>
         </div>
         <div className="flex justify-end mt-4">
-          <Link
+          {/* <Link
             to="/map"
             className="inline-block bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-600">
             Back to Map
-          </Link>
+          </Link> */}
         </div>
       </div>
-    </div>
   );
 };

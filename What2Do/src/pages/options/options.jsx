@@ -7,26 +7,26 @@ const mockData = [
     {
         activity: "eat breakfast",
         options: [
-            { id: 1, text: "option 1", selected: false },
-            { id: 2, text: "option 2", selected: false },
-            { id: 3, text: "option 3", selected: false }
+            { id: 1, text: "Cupitol Coffee", selected: false },
+            { id: 2, text: "Fridas", selected: false },
+            { id: 3, text: "Ovo Frito", selected: false }
         ]
     },
     {
         activity: "touch grass",
         options: [
-            { id: 1, text: "option 1", selected: false },
-            { id: 2, text: "option 2", selected: false },
-            { id: 3, text: "option 3", selected: false }
+            { id: 1, text: "Northwestern Lakefill", selected: false },
+            { id: 2, text: "Grosse Point Lighthouse", selected: false },
+            { id: 3, text: "Clark Street Beach", selected: false }
         ]
     },
     {
-        activity: "touch grass",
+        activity: "arts and culture",
         options: [
-            { id: 1, text: "option 1", selected: false },
-            { id: 2, text: "option 2", selected: false },
-            { id: 3, text: "option 3", selected: false },
-            { id: 4, text: "option 4", selected: false }
+            { id: 1, text: "Block Museum of Art", selected: false },
+            { id: 2, text: "Cerqua Rivera Dance Theatre", selected: false },
+            { id: 3, text: "Music Institute of Chicago", selected: false },
+            { id: 4, text: "Fleetwood-Jourdain Theatre", selected: false }
         ]
     }
 ];
