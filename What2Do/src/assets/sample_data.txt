@@ -1,0 +1,52 @@
+#Location Data
+
+# Data 1
+location: "Kyzyl"
+
+Description: 
+
+6:00 AM - Land in Abakan Airport (after previous day's Moscow flight)
+6:30 AM - Arrange private car transport ($30-60 for private ride)
+7:00 AM - Begin 5-hour drive to Kyzyl
+
+Drive through Sayan Mountains
+Cross through Krasnoyarsk Krai
+Photo stops at scenic mountain views
+
+12:00 PM - Arrive in Kyzyl
+12:30 PM - Check into hotel
+1:30 PM - Late lunch in city center
+Afternoon Activities:
+2:30 PM - Visit the Center of Asia Monument
+
+This is mentioned indirectly in the article as Tuva being "the geographical center of Asia"
+4:00 PM - Visit the National Museum
+Learn about local culture
+See exhibits on throat singing (khoomei)
+6:00 PM - Evening meal with locals if possible
+8:00 PM - Try to attend any available throat singing performances
+
+Day: "1"
+
+# Data 2
+
+Location: "Kyzyl"
+
+Description: 
+
+8:00 AM - Breakfast
+Morning:
+9:00 AM - Visit a local Buddhist temple
+11:00 AM - Arrange visit to nearby village
+
+Meet locals
+Experience daily life
+Bring small gifts as courtesy
+
+1:00 PM - Traditional lunch
+Afternoon:
+2:30 PM - Visit the Footprint of Buddha site (mentioned in article's photos)
+4:00 PM - Begin return journey to Abakan
+9:00 PM - Arrive Abakan for evening flight
+
+Day: "2"
