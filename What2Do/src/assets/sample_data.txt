@@ -50,3 +50,21 @@ Afternoon:
 9:00 PM - Arrive Abakan for evening flight
 
 Day: "2"
+
+JSON Format: 
+
+{
+  "tripName": "Tuva Adventure",
+  "itinerary": [
+    {
+      "day": "1",
+      "location": "Kyzyl",
+      "description": "6:00 AM - Land in Abakan Airport (after previous day's Moscow flight)\n6:30 AM - Arrange private car transport ($30-60 for private ride)\n7:00 AM - Begin 5-hour drive to Kyzyl\n- Drive through Sayan Mountains\n- Cross through Krasnoyarsk Krai\n- Photo stops at scenic mountain views\n\n12:00 PM - Arrive in Kyzyl\n12:30 PM - Check into hotel\n1:30 PM - Late lunch in city center\n\nAfternoon Activities:\n2:30 PM - Visit the Center of Asia Monument\n- This is mentioned indirectly in the article as Tuva being \"the geographical center of Asia\"\n4:00 PM - Visit the National Museum\n- Learn about local culture\n- See exhibits on throat singing (khoomei)\n6:00 PM - Evening meal with locals if possible\n8:00 PM - Try to attend any available throat singing performances"
+    },
+    {
+      "day": "2",
+      "location": "Kyzyl",
+      "description": "8:00 AM - Breakfast\n\nMorning:\n9:00 AM - Visit a local Buddhist temple\n11:00 AM - Arrange visit to nearby village\n- Meet locals\n- Experience daily life\n- Bring small gifts as courtesy\n\n1:00 PM - Traditional lunch\n\nAfternoon:\n2:30 PM - Visit the Footprint of Buddha site (mentioned in article's photos)\n4:00 PM - Begin return journey to Abakan\n9:00 PM - Arrive Abakan for evening flight"
+    }
+  ]
+}
