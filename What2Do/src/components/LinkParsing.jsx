@@ -11,61 +11,99 @@ const LinkParsing = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const constructPrompt = (articleUrl) => {
-    return `Please analyze this article from ${articleUrl} and extract the following travel-related information:
-    1. Location(s) mentioned
-    2. Suggested activities or attractions
-    3. Best time to visit
-    4. Estimated duration for activities
-    5. Any specific tips or recommendations
-    Please format the response in a structured way that would be useful for itinerary planning.`;
+  const constructPrompt = (articleContent) => {
+    return `Based on this article content: "${articleContent}", please create a detailed travel itinerary. The response must be in valid JSON format with the following structure:
+    {
+      "tripName": "string",
+      "itinerary": [
+        {
+          "day": "string",
+          "location": "string",
+          "description": "string with newline characters (\\n) for formatting"
+        }
+      ]
+    }
+    Include all locations, activities, times, and recommendations from the article. Format times in 24-hour format (e.g., "14:00"). Make the description detailed with specific times and activities.`;
   };
 
-  const fetchGPTResponse = async () => {
-    setLoading(true);
-    setError('');
+  const fetchArticleContent = async (articleUrl) => {
     try {
-      const openaiApiKey = process.env.REACT_APP_OPENAI_API_KEY;
-      
-      const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      const response = await fetch('/api/fetch-article', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${openaiApiKey}`,
         },
-        body: JSON.stringify({
-          model: 'gpt-4',
-          messages: [
-            {
-              role: 'user',
-              content: constructPrompt(url)
-            }
-          ],
-          temperature: 0.7,
-          max_tokens: 500,
-        }),
+        body: JSON.stringify({ url: articleUrl }),
       });
-
-      const data = await response.json();
-      if (response.ok) {
-        setResponse(data.choices[0].message.content);
-      } else {
-        setError(`Error: ${data.error?.message || 'Failed to process the article'}`);
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch article content');
       }
-    } catch (err) {
-      setError('Failed to fetch the API response. Please check your API key and try again.');
-    } finally {
-      setLoading(false);
+      
+      const data = await response.json();
+      return data.content;
+    } catch (error) {
+      throw new Error('Failed to fetch article content: ' + error.message);
     }
   };
 
-  const handleSubmit = (e) => {
+  const fetchGPTResponse = async (articleContent) => {
+    const openaiApiKey = process.env.REACT_APP_OPENAI_API_KEY;
+    
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${openaiApiKey}`,
+      },
+      body: JSON.stringify({
+        model: 'gpt-4',
+        messages: [
+          {
+            role: 'user',
+            content: constructPrompt(articleContent)
+          }
+        ],
+        temperature: 0.7,
+        max_tokens: 1000,
+        response_format: { type: "json_object" }
+      }),
+    });
+
+    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(data.error?.message || 'Failed to process the article');
+    }
+
+    return JSON.parse(data.choices[0].message.content);
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!url.trim()) {
       setError('Please enter a valid URL');
       return;
     }
-    fetchGPTResponse();
+
+    setLoading(true);
+    setError('');
+    try {
+      const articleContent = await fetchArticleContent(url);
+      const gptResponse = await fetchGPTResponse(articleContent);
+      setResponse(gptResponse);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const formatDescription = (description) => {
+    return description.split('\n').map((line, index) => (
+      <div key={index} className="ml-4">
+        {line}
+      </div>
+    ));
   };
 
   return (
@@ -84,9 +122,9 @@ const LinkParsing = () => {
               className="w-full"
             />
           </div>
-          <Button 
-            type="submit" 
-            disabled={loading} 
+          <Button
+            type="submit"
+            disabled={loading}
             className="w-full"
           >
             {loading ? (
@@ -109,8 +147,13 @@ const LinkParsing = () => {
 
         {response && (
           <div className="mt-6 p-4 bg-gray-50 rounded-lg">
-            <h3 className="font-semibold mb-2">Extracted Information:</h3>
-            <div className="whitespace-pre-wrap">{response}</div>
+            <h3 className="font-semibold mb-2">{response.tripName}</h3>
+            {response.itinerary.map((day, index) => (
+              <div key={index} className="mb-4">
+                <h4 className="font-semibold">Day {day.day} - {day.location}</h4>
+                {formatDescription(day.description)}
+              </div>
+            ))}
           </div>
         )}
       </CardContent>
