@@ -1,5 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import AuthBanner from "../pages/LoginPage/AuthBanner";
+import { WorldMapBackground } from "../pages/LoginPage/loginBackground";
 
 export const TripList = ({ trips }) => {
   const formatDateTime = (timestamp) => {
@@ -23,19 +25,17 @@ export const TripList = ({ trips }) => {
   };
 
   return (
-    <div className="p-6">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">My Trips</h1>
-        <Link
-          to="/add"
-          className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-        >
-          Add New Trip
-        </Link>
+    <div className="p-6 min-h-screen relative overflow-hidden bg-[#E6F3FF]">
+      <WorldMapBackground />
+      <div className="flex justify-between items-center mb-6 z-10 relative">
+        <AuthBanner />
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 z-10 relative">
         {trips.map((trip, index) => (
-          <div key={index} className="border rounded-lg p-4 shadow">
+          <div
+            key={index}
+            className="border border-gray-200 rounded-lg p-6 shadow-lg bg-white hover:shadow-xl transition-shadow duration-200"
+          >
             <h2 className="text-xl font-semibold">{trip.location}</h2>
             <div className="text-gray-600 space-y-1">
               <p>{formatDateTime(trip.startTimestamp).split("at")[0]}</p>
@@ -72,10 +72,7 @@ export const TripList = ({ trips }) => {
               </ul>
             </div>
             <div className="mt-4 space-x-2">
-              <Link
-                to={`/options`}
-                className="text-blue-500 hover:underline"
-              >
+              <Link to={`/options`} className="text-blue-500 hover:underline">
                 Generate Options
               </Link>
               <Link
