@@ -4,8 +4,9 @@ import { TripList } from "./components/TripList";
 import { AddTrip } from "./components/AddTrip";
 import { EditTrip } from "./components/EditTrip";
 import { MapView } from "./components/MapView";
-import { OptionsPage } from './pages/options/options';
-import { TripItinerary } from './components/TripItinerary';
+import { OptionsPage } from "./pages/options/options";
+import { TripItinerary } from "./components/TripItinerary";
+import LoginPage from "./pages/LoginPage/userLogin";
 
 const App = () => {
   const [trips, setTrips] = useState([]);
@@ -24,7 +25,8 @@ const App = () => {
     <BrowserRouter>
       <div className="min-h-screen bg-gray-50">
         <Routes>
-          <Route path="/" element={<TripList trips={trips} />} />
+          <Route path="/" element={<LoginPage />} />
+          <Route path="/trips" element={<TripList trips={trips} />} />
           <Route path="/add" element={<AddTrip onAddTrip={addTrip} />} />
           <Route
             path="/edit/:id"
