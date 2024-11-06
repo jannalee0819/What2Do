@@ -1,38 +1,80 @@
-import React from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import { ref, get } from 'firebase/database';
+import { fetchTripDataFromFirebase } from '../../utilities/firebaseSummaryHelper'; 
 
 const SummaryCard = ({ children, className = "" }) => (
     <div className={`bg-white rounded-lg border shadow-sm p-4 ${className}`}>
         {children}
     </div>
 );
+const mockData = {
+    title: "Northwestern Campus Tour",
+    days: [
+        {
+            day: 1,
+            locations: [
+                {
+                    destination: "Evanston Campus",
+                    description: "9:00 AM - 12:00 PM: Tour the beautiful lakeside campus including University Library and The Rock"
+                },
+                {
+                    destination: "Downtown Evanston",
+                    description: "2:00 PM - 5:00 PM: Explore local restaurants and shops on Davis Street"
+                }
+            ]
+        },
+        {
+            day: 2,
+            locations: [
+                {
+                    destination: "Lakefill",
+                    description: "10:00 AM - 1:00 PM: Walk along Lake Michigan and visit the nature areas"
+                },
+                {
+                    destination: "Ryan Field",
+                    description: "3:00 PM - 5:00 PM: Check out the football stadium and athletic facilities"
+                }
+            ]
+        },
+        {
+            day: 3,
+            locations: [
+                {
+                    destination: "Technological Institute",
+                    description: "11:00 AM - 2:00 PM: Visit the engineering buildings and research labs"
+                }
+            ]
+        }
+    ]
+};
 
 export const TripSummaryPage = () => {
     const navigate = useNavigate();
-    const location = useLocation();
-    const tripData = location.state?.tripData || {
-        // Sample data structure - replace with your actual data
-        title: "Weekend in Paris",
-        days: [
-            {
-                day: 1,
-                locations: ["Eiffel Tower", "Louvre Museum"]
-            },
-            {
-                day: 2,
-                locations: ["Notre-Dame", "Seine River Cruise"]
-            }
-        ]
-    };
+    const { userId, tripId } = useParams();
+    const [tripData, setTripData] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [isUsingMockData, setIsUsingMockData] = useState(false);
+
+    useEffect(() => {
+        const loadTripData = async () => {
+            setLoading(true);
+            const { data, error, isUsingMockData: usingMock } = 
+                await fetchTripDataFromFirebase(userId, tripId);
+            
+            setTripData(data || mockData);
+            setIsUsingMockData(usingMock);
+            setLoading(false);
+        };
+
+        loadTripData();
+    }, [userId, tripId]);
 
     const handleAddToTrips = () => {
-        // Add to user's trips logic here
-        navigate('/my-trips');
+        navigate('/trips');
     };
 
     const handleShare = () => {
-        // Share functionality - could open a modal or copy link
-        // For now, just copy to clipboard
         navigator.clipboard.writeText(window.location.href);
         alert('Link copied to clipboard!');
     };
@@ -40,6 +82,18 @@ export const TripSummaryPage = () => {
     const handleBackHome = () => {
         navigate('/');
     };
+
+    if (loading) {
+        return <div className="flex justify-center items-center min-h-screen">
+            <div className="text-xl">Loading trip details...</div>
+        </div>;
+    }
+
+    if (!tripData) {
+        return <div className="flex justify-center items-center min-h-screen">
+            <div className="text-xl">Trip not found</div>
+        </div>;
+    }
 
     return (
         <div className="max-w-2xl mx-auto p-6 space-y-6">
@@ -57,7 +111,14 @@ export const TripSummaryPage = () => {
                                 <h2 className="font-semibold text-lg mb-2">Day {day.day}</h2>
                                 <ul className="list-disc list-inside space-y-2 text-gray-600">
                                     {day.locations.map((location, locIndex) => (
-                                        <li key={locIndex}>{location}</li>
+                                        <li key={locIndex} className="space-y-1">
+                                            <span className="font-medium text-gray-800">
+                                                {location.destination}
+                                            </span>
+                                            <p className="ml-6 text-gray-600">
+                                                {location.description}
+                                            </p>
+                                        </li>
                                     ))}
                                 </ul>
                             </div>
