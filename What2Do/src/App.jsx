@@ -7,6 +7,7 @@ import { MapView } from "./components/MapView";
 import { OptionsPage } from "./pages/options/options";
 import { TripItinerary } from "./components/TripItinerary";
 import LoginPage from "./pages/LoginPage/userLogin";
+import { Profile } from './components/Profile'
 
 const App = () => {
   const [trips, setTrips] = useState([]);
@@ -35,6 +36,7 @@ const App = () => {
           <Route path="/map" element={<MapView />} />
           <Route path="/options" element={<OptionsPage />} />
           <Route path="/itinerary" element={<TripItinerary />} />
+          <Route path="/profile" element={<Profile />} />
         </Routes>
       </div>
     </BrowserRouter>

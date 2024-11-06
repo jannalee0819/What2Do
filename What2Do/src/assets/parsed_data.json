@@ -1,0 +1,45 @@
+{
+    "user": {
+      "name": "Chris",
+      "email": "profchris@northwestern.edu",
+      "trips": {
+        "France Tour": {
+          "locations": {
+            "1": {
+              "destination": "Paris",
+              "description": "Visit the Eiffel Tower and explore local cafes",
+              "day": 1
+            },
+            "2": {
+              "destination": "Versailles",
+              "description": "Tour the Palace of Versailles",
+              "day": 2
+            },
+            "3": {
+              "destination": "Nice",
+              "description": "Lounge on the beaches of southern France",
+              "day": 3
+            }
+          },
+          "source": "https://travel-blog.com/france",
+          "days": 3
+        },
+        "Italy Adventure": {
+          "locations": {
+            "1": {
+              "destination": "Rome",
+              "description": "Explore the Colosseum and Roman Forum",
+              "day": 1
+            },
+            "2": {
+              "destination": "Vatican City",
+              "description": "Visit St. Peter's Basilica and the Sistine Chapel",
+              "day": 2
+            }
+          },
+          "source": "https://travel-blog.com/italy",
+          "days": 2
+        }
+      }
+    }
+  }
