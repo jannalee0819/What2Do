@@ -1,82 +1,18 @@
 import React, { useState } from 'react';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { Card } from './Card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { AlertCircle, Loader2 } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { processArticleUrl } from '@/utilities/urlParser';
 
 const LinkParsing = () => {
   const [url, setUrl] = useState('');
+  const [numberOfDays, setNumberOfDays] = useState('3');
   const [response, setResponse] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-
-  const constructPrompt = (articleContent) => {
-    return `Based on this article content: "${articleContent}", please create a detailed travel itinerary. The response must be in valid JSON format with the following structure:
-    {
-      "tripName": "string",
-      "itinerary": [
-        {
-          "day": "string",
-          "location": "string",
-          "description": "string with newline characters (\\n) for formatting"
-        }
-      ]
-    }
-    Include all locations, activities, times, and recommendations from the article. Format times in 24-hour format (e.g., "14:00"). Make the description detailed with specific times and activities.`;
-  };
-
-  const fetchArticleContent = async (articleUrl) => {
-    try {
-      const response = await fetch('/api/fetch-article', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ url: articleUrl }),
-      });
-      
-      if (!response.ok) {
-        throw new Error('Failed to fetch article content');
-      }
-      
-      const data = await response.json();
-      return data.content;
-    } catch (error) {
-      throw new Error('Failed to fetch article content: ' + error.message);
-    }
-  };
-
-  const fetchGPTResponse = async (articleContent) => {
-    const openaiApiKey = process.env.REACT_APP_OPENAI_API_KEY;
-    
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${openaiApiKey}`,
-      },
-      body: JSON.stringify({
-        model: 'gpt-4',
-        messages: [
-          {
-            role: 'user',
-            content: constructPrompt(articleContent)
-          }
-        ],
-        temperature: 0.7,
-        max_tokens: 1000,
-        response_format: { type: "json_object" }
-      }),
-    });
-
-    const data = await response.json();
-    if (!response.ok) {
-      throw new Error(data.error?.message || 'Failed to process the article');
-    }
-
-    return JSON.parse(data.choices[0].message.content);
-  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -87,10 +23,10 @@ const LinkParsing = () => {
 
     setLoading(true);
     setError('');
+    
     try {
-      const articleContent = await fetchArticleContent(url);
-      const gptResponse = await fetchGPTResponse(articleContent);
-      setResponse(gptResponse);
+      const result = await processArticleUrl(url, parseInt(numberOfDays));
+      setResponse(result);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -108,10 +44,9 @@ const LinkParsing = () => {
 
   return (
     <Card className="w-full max-w-2xl mx-auto">
-      <CardHeader>
-        <CardTitle>Travel Article Analysis</CardTitle>
-      </CardHeader>
-      <CardContent>
+      <div className="p-6">
+        <h2 className="text-2xl font-semibold mb-4">Travel Article Analysis</h2>
+        
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <Input
@@ -122,6 +57,25 @@ const LinkParsing = () => {
               className="w-full"
             />
           </div>
+
+          <div>
+            <Select
+              value={numberOfDays}
+              onValueChange={setNumberOfDays}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Select number of days" />
+              </SelectTrigger>
+              <SelectContent>
+                {[...Array(14)].map((_, i) => (
+                  <SelectItem key={i + 1} value={(i + 1).toString()}>
+                    {i + 1} {i === 0 ? 'day' : 'days'}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
           <Button
             type="submit"
             disabled={loading}
@@ -156,7 +110,7 @@ const LinkParsing = () => {
             ))}
           </div>
         )}
-      </CardContent>
+      </div>
     </Card>
   );
 };
