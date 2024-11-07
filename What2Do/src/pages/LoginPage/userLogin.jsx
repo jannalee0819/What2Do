@@ -14,7 +14,7 @@ const LoginPage = () => {
 
   useEffect(() => {
     if (user) {
-      navigate("/trips");
+      navigate("/profile");
     }
   }, [user, navigate]);
 

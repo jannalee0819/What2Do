@@ -8,7 +8,7 @@ import { OptionsPage } from "./pages/options/options";
 import { TripSummaryPage } from "./pages/genSummary/genSummary";
 import { TripItinerary } from "./components/TripItinerary";
 import LoginPage from "./pages/LoginPage/userLogin";
-import { Profile } from './components/Profile'
+import { Profile } from './pages/Profile/Profile'
 
 const App = () => {
   const [trips, setTrips] = useState([]);
