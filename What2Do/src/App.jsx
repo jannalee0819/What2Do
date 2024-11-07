@@ -36,7 +36,7 @@ const App = () => {
           />
           <Route path="/map" element={<MapView />} />
           <Route path="/options" element={<OptionsPage />} />
-          <Route path="/itinerary" element={<TripItinerary />} />
+          {/* <Route path="/itinerary" element={<TripItinerary />} /> */}
           <Route path="/summary/:id/:tripId" element={<TripSummaryPage />} />
           <Route path="/summary/:tripId" element={<TripSummaryPage />} />
           <Route path="/profile" element={<Profile />} />

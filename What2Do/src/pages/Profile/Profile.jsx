@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { TripCard } from '../../components/TripCard';
 import { Plus, LogOut, Star, MapPin } from "lucide-react";
 import { signOut, useAuthState } from "../../utilities/firebase_helper";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { getProfile } from '../../utilities/fetchProfileData';
 
 export function Profile () {
@@ -97,10 +97,10 @@ export function Profile () {
               <MapPin className="w-5 h-5 text-blue-600" />
               <h2 className="text-lg font-semibold text-gray-700">My Trips</h2>
             </div>
-            <button className="flex items-center gap-2 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white font-medium rounded-xl shadow-sm transition-all hover:shadow-md">
+            <Link to="../add" relative="path" className="flex items-center gap-2 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white font-medium rounded-xl shadow-sm transition-all hover:shadow-md">
               Create Trip
               <Plus className="w-4 h-4" strokeWidth={2.6} />
-            </button>
+            </Link>
           </div>
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
             {Object.entries(data.trips).map(([tripName, tripData]) => (
