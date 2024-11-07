@@ -5,6 +5,7 @@ import { AddTrip } from "./components/AddTrip";
 import { EditTrip } from "./components/EditTrip";
 import { MapView } from "./components/MapView";
 import { OptionsPage } from "./pages/options/options";
+import { TripSummaryPage } from "./pages/genSummary/genSummary";
 import { TripItinerary } from "./components/TripItinerary";
 import LoginPage from "./pages/LoginPage/userLogin";
 import { Profile } from './components/Profile'
@@ -36,6 +37,8 @@ const App = () => {
           <Route path="/map" element={<MapView />} />
           <Route path="/options" element={<OptionsPage />} />
           <Route path="/itinerary" element={<TripItinerary />} />
+          <Route path="/summary" element={<TripSummaryPage />} />
+          <Route path="/summary/:userId/:tripId" element={<TripSummaryPage />} /> 
           <Route path="/profile" element={<Profile />} />
         </Routes>
       </div>
