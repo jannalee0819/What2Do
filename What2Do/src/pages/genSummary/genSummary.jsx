@@ -53,34 +53,84 @@ const mockData = {
 
 export const TripSummaryPage = () => {
     const navigate = useNavigate();
-    const { userId, tripId } = useParams();
+    const params = useParams();
     const [tripData, setTripData] = useState(null);
     const [loading, setLoading] = useState(true);
     const [isUsingMockData, setIsUsingMockData] = useState(false);
     const [user] = useAuthState();
 
+    const getUserId = () => {
+        // If we have both id and tripId in the route
+        if (params.id && params.tripId) {
+            return params.id; // Use the provided userId
+        }
+        // If we only have tripId in the route
+        if (params.tripId && !params.id) {
+            return user?.uid; // Use the authenticated user's uid
+        }
+        return null;
+    };
+
+    const getTripId = () => {
+        return params.tripId || params.id; // params.id in this case would be the tripId
+    };
+    
     useEffect(() => {
         const loadTripData = async () => {
-            setLoading(true);
-            const { data, error, isUsingMockData: usingMock } = 
-                await fetchTripDataFromFirebase(userId, tripId);
-            
-            setTripData(data || mockData);
-            setIsUsingMockData(usingMock);
-            setLoading(false);
+            // For routes with only tripId, wait for user data
+            if (!params.id && !user) {
+                console.log('Waiting for user data...');
+                return;
+            }
+
+            const effectiveUserId = getUserId();
+            const effectiveTripId = getTripId();
+
+            if (!effectiveUserId || !effectiveTripId) {
+                console.log('Missing required IDs');
+                return;
+            }
+
+            try {
+                setLoading(true);
+                console.log('Using User ID:', effectiveUserId);
+                
+                const { data, error, isUsingMockData: usingMock } = 
+                    await fetchTripDataFromFirebase(effectiveUserId, effectiveTripId);
+                
+                setTripData(data || mockData);
+                setIsUsingMockData(usingMock);
+            } catch (error) {
+                console.error("Error loading trip data:", error);
+            } finally {
+                setLoading(false);
+            }
         };
 
         loadTripData();
-        console.log(user.email);
-    }, [userId, tripId]);
+    }, [params, user]);
 
     const handleAddToTrips = () => {
         navigate('/trips');
     };
 
     const handleShare = () => {
-        navigator.clipboard.writeText(window.location.href);
-        alert('Link copied to clipboard!');
+        // Get the base URL (e.g., "https://yourapp.com")
+        const baseUrl = window.location.origin;
+        
+        // Get the effective user ID (either from params or current user)
+        const effectiveUserId = params.id || user?.uid;
+        const effectiveTripId = params.tripId || params.id; // depending on route pattern
+    
+        if (effectiveUserId && effectiveTripId) {
+            // Construct the sharing URL with the correct format
+            const shareUrl = `${baseUrl}/summary/${effectiveUserId}/${effectiveTripId}`;
+            
+            navigator.clipboard.writeText(shareUrl);
+            alert('Link copied to clipboard!');
+        } else {
+            alert('Unable to generate sharing link');
+        }
     };
 
     const handleBackHome = () => {
