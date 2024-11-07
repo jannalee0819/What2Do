@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { ref, get } from 'firebase/database';
 import { fetchTripDataFromFirebase } from '../../utilities/firebaseSummaryHelper'; 
+import { useUser, useAuthState } from '../../utilities/firebase_helper';
+import AuthBanner from '../../pages/LoginPage/AuthBanner';
 
 const SummaryCard = ({ children, className = "" }) => (
     <div className={`bg-white rounded-lg border shadow-sm p-4 ${className}`}>
@@ -55,6 +57,7 @@ export const TripSummaryPage = () => {
     const [tripData, setTripData] = useState(null);
     const [loading, setLoading] = useState(true);
     const [isUsingMockData, setIsUsingMockData] = useState(false);
+    const [user] = useAuthState();
 
     useEffect(() => {
         const loadTripData = async () => {
@@ -68,6 +71,7 @@ export const TripSummaryPage = () => {
         };
 
         loadTripData();
+        console.log(user.email);
     }, [userId, tripId]);
 
     const handleAddToTrips = () => {
