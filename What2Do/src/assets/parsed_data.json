@@ -1,45 +1,107 @@
 {
-    "user": {
-      "name": "Chris",
-      "email": "profchris@northwestern.edu",
+  "users": {
+    "recommendations": {
       "trips": {
-        "France Tour": {
+        "rec1": {
+          "link": "link1.com",
+          "days": 2,
           "locations": {
             "1": {
-              "destination": "Paris",
-              "description": "Visit the Eiffel Tower and explore local cafes",
+              "destination": "Chicago",
+              "description": "visit the art institute",
               "day": 1
             },
             "2": {
-              "destination": "Versailles",
-              "description": "Tour the Palace of Versailles",
+              "destination": "Evanston",
+              "description": "visit the northwestern campus",
               "day": 2
             },
             "3": {
-              "destination": "Nice",
-              "description": "Lounge on the beaches of southern France",
-              "day": 3
+              "destination": "Glencoe",
+              "description": "walk around the glencoe art fair",
+              "day": 2
             }
-          },
-          "source": "https://travel-blog.com/france",
-          "days": 3
+          }
         },
-        "Italy Adventure": {
+        "rec2": {
+          "link": "link2.com",
+          "days": 3,
           "locations": {
             "1": {
-              "destination": "Rome",
-              "description": "Explore the Colosseum and Roman Forum",
+              "destination": "San Francisco",
+              "description": "explore fisherman's wharf and pier 39",
               "day": 1
             },
             "2": {
-              "destination": "Vatican City",
-              "description": "Visit St. Peter's Basilica and the Sistine Chapel",
+              "destination": "Muir Woods",
+              "description": "hike through the redwood forest",
+              "day": 2
+            },
+            "3": {
+              "destination": "Sausalito",
+              "description": "enjoy waterfront dining and shopping",
+              "day": 2
+            },
+            "4": {
+              "destination": "Napa Valley",
+              "description": "wine tasting tour through vineyards",
+              "day": 3
+            }
+          }
+        },
+        "rec3": {
+          "link": "link3.com",
+          "days": 2,
+          "locations": {
+            "1": {
+              "destination": "Boston",
+              "description": "walk the freedom trail",
+              "day": 1
+            },
+            "2": {
+              "destination": "Cambridge",
+              "description": "visit harvard and mit campuses",
+              "day": 1
+            },
+            "3": {
+              "destination": "Salem",
+              "description": "explore witch history museums",
+              "day": 2
+            },
+            "4": {
+              "destination": "Gloucester",
+              "description": "enjoy fresh seafood by the harbor",
               "day": 2
             }
-          },
-          "source": "https://travel-blog.com/italy",
-          "days": 2
+          }
+        },
+        "rec4": {
+          "link": "link4.com",
+          "days": 3,
+          "locations": {
+            "1": {
+              "destination": "Seattle",
+              "description": "visit pike place market and space needle",
+              "day": 1
+            },
+            "2": {
+              "destination": "Mount Rainier",
+              "description": "scenic drive and hiking trails",
+              "day": 2
+            },
+            "3": {
+              "destination": "Bainbridge Island",
+              "description": "ferry ride and island exploring",
+              "day": 2
+            },
+            "4": {
+              "destination": "Olympic National Park",
+              "description": "rainforest and coastal trails",
+              "day": 3
+            }
+          }
         }
       }
     }
   }
+}
