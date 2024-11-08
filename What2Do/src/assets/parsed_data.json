@@ -5,6 +5,7 @@
         "rec1": {
           "link": "link1.com",
           "days": 2,
+          "tripName": "Chicago Adventure",
           "locations": {
             "1": {
               "destination": "Chicago",
@@ -26,6 +27,7 @@
         "rec2": {
           "link": "link2.com",
           "days": 3,
+          "tripName": "Bay Area Exploration",
           "locations": {
             "1": {
               "destination": "San Francisco",
@@ -52,6 +54,7 @@
         "rec3": {
           "link": "link3.com",
           "days": 2,
+          "tripName": "Boston Journey",
           "locations": {
             "1": {
               "destination": "Boston",
@@ -78,6 +81,7 @@
         "rec4": {
           "link": "link4.com",
           "days": 3,
+          "tripName": "Washington Nature Drive",
           "locations": {
             "1": {
               "destination": "Seattle",

@@ -19,15 +19,18 @@ const LoginPage = () => {
   }, [user, navigate]);
 
   return (
-    <div className="min-h-screen relative overflow-hidden bg-[#E6F3FF]">
+    <div className="min-h-screen relative overflow-hidden bg-white">
       <WorldMapBackground />
 
       <div className="relative min-h-screen flex flex-col justify-center items-center p-4">
-        <div className="max-w-md w-full backdrop-blur-sm bg-white/30 rounded-2xl p-8 shadow-lg">
-          <div className="text-center mb-12">
-            <h2 className="text-4xl font-light text-gray-800 tracking-wide">
-              W2D Login
+        <div className="max-w-md w-full backdrop-blur-sm bg-white/70 rounded-2xl p-8 shadow-lg">
+          <div className="flex flex-col text-center gap-2 mb-12">
+            <h2 className="text-4xl font-bold text-gray-700 tracking-wide">
+              Welcome to <span className="text-blue-500">W2D!</span>
             </h2>
+            <h3 className="text-xl text-gray-500">
+              Plan your next adventure. 
+            </h3>
           </div>
 
           <div className="space-y-6">
