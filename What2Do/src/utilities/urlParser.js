@@ -1,5 +1,3 @@
-// utilities/urlParser.js
-
 import axios from 'axios';
 import * as cheerio from 'cheerio';
 import { addTrip } from './firebase_helper';
@@ -44,9 +42,7 @@ const extractMainContent = ($) => {
 
 const parseUrl = async (url) => {
   try {
-    // Use a CORS proxy service
     const corsProxy = 'https://corsproxy.io/?' + encodeURIComponent(url);
-    // Or alternatively: const corsProxy = `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
     
     const response = await axios.get(corsProxy, {
       headers: {
@@ -70,15 +66,21 @@ const parseUrl = async (url) => {
 };
 
 const processWithGPT = async (content, numberOfDays) => {
+  // Check if API key is available
+  const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
+  if (!apiKey) {
+    throw new Error('OpenAI API key not configured');
+  }
+
   try {
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${process.env.NEXT_PUBLIC_OPENAI_API_KEY}`,
+        'Authorization': `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        model: 'gpt-4',
+        model: 'gpt-4o',
         messages: [{
           role: 'user',
           content: `Based on this article content: "${content}", please create a ${numberOfDays}-day itinerary. Format the response as a JSON object with this structure:
@@ -110,7 +112,7 @@ const processWithGPT = async (content, numberOfDays) => {
 
     // Convert to Firebase format
     const firebaseData = {
-      link: url, // Store the original URL
+      link: content.substring(0, 100) + "...", // Store a preview of the content
       locations: parsedResponse.itinerary.map(item => ({
         day: parseInt(item.day),
         description: item.description,
