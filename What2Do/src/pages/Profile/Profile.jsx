@@ -120,23 +120,23 @@ export function Profile() {
               </button>
               {isDropdownOpen && (
                 <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden z-50">
-                  <Link
-                    to="../add"
-                    className="flex items-center gap-2 px-4 py-3 text-gray-700 hover:bg-gray-50 transition-colors"
-                    onClick={() => setIsDropdownOpen(false)}
-                  >
-                    <PenSquare className="w-4 h-4" />
-                    <span>Manual Input</span>
-                  </Link>
-                  <Link
-                    to="../upload"
-                    className="flex items-center gap-2 px-4 py-3 text-gray-700 hover:bg-gray-50 transition-colors"
-                    onClick={() => setIsDropdownOpen(false)}
-                  >
-                    <FileUp className="w-4 h-4" />
-                    <span>URL Upload</span>
-                  </Link>
-                </div>
+                <Link
+                  to="/add"
+                  className="flex items-center gap-2 px-4 py-3 text-gray-700 hover:bg-gray-50 transition-colors"
+                  onClick={() => setIsDropdownOpen(false)}
+                >
+                  <PenSquare className="w-4 h-4" />
+                  <span>Manual Input</span>
+                </Link>
+                <Link
+                  to="/upload"
+                  className="flex items-center gap-2 px-4 py-3 text-gray-700 hover:bg-gray-50 transition-colors"
+                  onClick={() => setIsDropdownOpen(false)}
+                >
+                  <FileUp className="w-4 h-4" />
+                  <span>URL Upload</span>
+                </Link>
+              </div>
               )}
             </div>
           </div>

@@ -8,7 +8,8 @@ import { OptionsPage } from "./pages/options/options";
 import { TripSummaryPage } from "./pages/genSummary/genSummary";
 import { TripItinerary } from "./components/TripItinerary";
 import LoginPage from "./pages/LoginPage/userLogin";
-import { Profile } from './pages/Profile/Profile'
+import { Profile } from './pages/Profile/Profile';
+import { UrlUpload } from './pages/UrlUpload/UrlUpload'; // Add this import
 
 const App = () => {
   const [trips, setTrips] = useState([]);
@@ -40,6 +41,7 @@ const App = () => {
           <Route path="/summary/:id/:tripId" element={<TripSummaryPage />} />
           <Route path="/summary/:tripId" element={<TripSummaryPage />} />
           <Route path="/profile" element={<Profile />} />
+          <Route path="/upload" element={<UrlUpload />} /> {/* Add this route */}
         </Routes>
       </div>
     </BrowserRouter>

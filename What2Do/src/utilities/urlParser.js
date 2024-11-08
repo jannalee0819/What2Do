@@ -1,7 +1,7 @@
 // utilities/urlParser.js
 
 import axios from 'axios';
-import cheerio from 'cheerio';
+import * as cheerio from 'cheerio'; // Changed this line
 import { addTrip } from './firebase_helper';
 
 const cleanText = (text) => {
@@ -109,7 +109,7 @@ const processWithGPT = async (content, numberOfDays) => {
         description: item.description,
         destination: item.location
       })),
-      total_days: numberOfDays
+      days: numberOfDays
     };
 
     // Store in Firebase
