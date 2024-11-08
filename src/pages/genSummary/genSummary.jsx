@@ -86,6 +86,7 @@ export const TripSummaryPage = () => {
     const [isUsingMockData, setIsUsingMockData] = useState(false);
     const [user] = useAuthState();
     const [isEditing, setIsEditing] = useState(false);
+    const [canEdit, setCanEdit] = useState(true)
     const [editedData, setEditedData] = useState(null);
 
     const getUserId = () => {
@@ -116,6 +117,7 @@ export const TripSummaryPage = () => {
                     setTripData(recData);
                     setIsUsingMockData(false);
                     setLoading(false);
+                    setCanEdit(false)
                     return;
                 }
             }
@@ -319,14 +321,14 @@ export const TripSummaryPage = () => {
                                 >
                                     Back to Home
                                 </button>
-                                <button
+                                {canEdit && <button
                                     onClick={handleEdit}
                                     className="flex-1 px-6 py-2 bg-blue-500 text-white rounded-lg
                                              hover:bg-blue-600 transition-colors duration-200
                                              font-medium shadow-sm"
                                 >
                                     Edit
-                                </button>
+                                </button>}
                                 <button
                                     onClick={handleShare}
                                     className="flex-1 px-6 py-2 bg-green-500 text-white rounded-lg
