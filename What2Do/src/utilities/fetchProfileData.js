@@ -1,5 +1,5 @@
 import { firebase } from './firebase';
-import { getDatabase, ref, get, set} from 'firebase/database';
+import { getDatabase, ref, get, set, remove} from 'firebase/database';
 
 // Initialize the database
 const db = getDatabase(firebase);
@@ -44,3 +44,16 @@ export const getTrip = async (uid, tripName) => {
         throw error;
     }
 }
+
+
+// Delete a question -- maybe use a resolve for pm side too?
+export const deleteTrip = async (tripId, uid) => {
+    try {
+      const tripRef = ref(db, `users/${uid}/trips/${tripId}`);
+      await remove(tripRef);
+      console.log(`success! ${tripId} deleted`);
+    } catch (error) {
+      console.error('Error deleting trip:', error);
+      throw error;
+    }
+  };
