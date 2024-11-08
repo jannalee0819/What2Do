@@ -3,7 +3,7 @@ import { TripCard } from '../../components/TripCard';
 import { Plus, LogOut, Star, MapPin, FileUp, PenSquare } from "lucide-react";
 import { signOut, useAuthState } from "../../utilities/firebase_helper";
 import { useNavigate, Link } from "react-router-dom";
-import { getProfile } from '../../utilities/fetchProfileData';
+import { getProfile, deleteTrip} from '../../utilities/fetchProfileData';
 
 export function Profile() {
   const [data, setData] = useState({ trips: {} });
@@ -13,20 +13,21 @@ export function Profile() {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const initializeProfile = async () => {
-      if (user && !loading && !isInitialized) {
-        try {
-          const profileData = await getProfile(user.uid, user.displayName);
-          setData({trips: profileData.trips || {} });
-          setIsInitialized(true);
-          const recsData = await getProfile("recommendations", "recommendations");
-          setRecs({ trips: recsData.trips || {} });
-        } catch (error) {
-          console.error("Error initializing profile:", error);
-        }
+  const initializeProfile = async () => {
+    if (user && !loading && !isInitialized) {
+      try {
+        const profileData = await getProfile(user.uid, user.displayName);
+        setData({trips: profileData.trips || {} });
+        setIsInitialized(true);
+        const recsData = await getProfile("recommendations", "recommendations");
+        setRecs({ trips: recsData.trips || {} });
+      } catch (error) {
+        console.error("Error initializing profile:", error);
       }
-    };
+    }
+  };
+
+  useEffect(() => {
     initializeProfile();
 
     // Close dropdown when clicking outside
@@ -38,6 +39,19 @@ export function Profile() {
     document.addEventListener('click', handleClickOutside);
     return () => document.removeEventListener('click', handleClickOutside);
   }, [user, loading, isInitialized]);
+
+  const handleDeleteTrip = async (tripId) => {
+    if (window.confirm("Are you sure you want to delete this trip?")) {
+      try {
+        await deleteTrip(tripId, user.uid);
+        // Reset initialization to trigger a refresh
+        setIsInitialized(false);
+        await initializeProfile();
+      } catch (error) {
+        console.error("Error deleting trip:", error);
+      }
+    }
+  };
 
   const handleSignOut = async () => {
     try {
@@ -92,7 +106,7 @@ export function Profile() {
               <div className="flex gap-2 sm:gap-4">
                 {Object.entries(recs.trips).map(([tripId, tripData]) => (
                   <div key={tripId} className="w-80 flex-shrink-0">
-                    <TripCard trip={tripData} rec={1} tripId={tripId} />
+                    <TripCard trip={tripData} rec={1} tripId={tripId} onDelete={() => handleDeleteTrip(tripId)} />
                   </div>
                 ))}
               </div>
@@ -120,30 +134,30 @@ export function Profile() {
               </button>
               {isDropdownOpen && (
                 <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden z-50">
-                <Link
-                  to="/add"
-                  className="flex items-center gap-2 px-4 py-3 text-gray-700 hover:bg-gray-50 transition-colors"
-                  onClick={() => setIsDropdownOpen(false)}
-                >
-                  <PenSquare className="w-4 h-4" />
-                  <span>Manual Input</span>
-                </Link>
-                <Link
-                  to="/upload"
-                  className="flex items-center gap-2 px-4 py-3 text-gray-700 hover:bg-gray-50 transition-colors"
-                  onClick={() => setIsDropdownOpen(false)}
-                >
-                  <FileUp className="w-4 h-4" />
-                  <span>URL Upload</span>
-                </Link>
-              </div>
+                  <Link
+                    to="/add"
+                    className="flex items-center gap-2 px-4 py-3 text-gray-700 hover:bg-gray-50 transition-colors"
+                    onClick={() => setIsDropdownOpen(false)}
+                  >
+                    <PenSquare className="w-4 h-4" />
+                    <span>Manual Input</span>
+                  </Link>
+                  <Link
+                    to="/upload"
+                    className="flex items-center gap-2 px-4 py-3 text-gray-700 hover:bg-gray-50 transition-colors"
+                    onClick={() => setIsDropdownOpen(false)}
+                  >
+                    <FileUp className="w-4 h-4" />
+                    <span>URL Upload</span>
+                  </Link>
+                </div>
               )}
             </div>
           </div>
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
             {Object.entries(data.trips).map(([tripId, tripData]) => (
               <div key={tripId} className="transform transition-all hover:scale-[1.02]">
-                <TripCard trip={tripData} tripId={tripId} />
+                <TripCard trip={tripData} tripId={tripId} onDelete={() => handleDeleteTrip(tripId)} />
               </div>
             ))}
           </div>

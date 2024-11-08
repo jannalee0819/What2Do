@@ -8,9 +8,9 @@ import {
     CardContent, 
     CardFooter 
 } from './Card';
-import { MapPin, Calendar, ArrowRight, Clock } from "lucide-react";
+import { MapPin, Calendar, ArrowRight, Clock, Trash} from "lucide-react";
 
-export function TripCard({ trip, tripId, rec }) {
+export function TripCard({ trip, tripId, rec, onDelete}) {
   const navigate = useNavigate()
   const getRandomGradient = () => {
     const gradients = [
@@ -36,6 +36,10 @@ export function TripCard({ trip, tripId, rec }) {
             <div className="bg-white/20 rounded-lg px-3 py-1 text-white text-sm font-medium">
               {trip.days} Days
             </div>
+            <button onClick={onDelete}
+             className="group rounded-md p-1 text-white hover:bg-white/20">
+              <Trash className="w-4 h-4" />
+          </button>
           </div>
         </div>
         <CardHeader className="pt-4">
@@ -62,6 +66,10 @@ export function TripCard({ trip, tripId, rec }) {
             <div className="bg-white/20 backdrop-blur-md rounded-lg px-3 py-1 text-white text-sm font-medium">
               {trip.days} Days
             </div>
+            <button onClick={onDelete}
+             className="group rounded-md p-1 text-white hover:bg-white/20">
+              <Trash className="w-4 h-4" />
+            </button>
           </div>
         </div>
         <CardHeader className="pt-4">
