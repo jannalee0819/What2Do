@@ -4,6 +4,33 @@ import { ref, get } from 'firebase/database';
 import { fetchTripDataFromFirebase } from '../../utilities/firebaseSummaryHelper'; 
 import { useUser, useAuthState } from '../../utilities/firebase_helper';
 import AuthBanner from '../../pages/LoginPage/AuthBanner';
+import recommendedTrips from '../../assets/parsed_data.json';
+
+const formatRecommendedTrip = (recId) => {
+    const tripData = recommendedTrips.users.recommendations.trips[recId];
+    if (!tripData) return null;
+
+    const locationsByDay = {};
+    Object.values(tripData.locations).forEach(location => {
+        if (!locationsByDay[location.day]) {
+            locationsByDay[location.day] = [];
+        }
+        locationsByDay[location.day].push({
+            destination: location.destination,
+            description: location.description
+        });
+    });
+
+    return {
+        title: `Trip to ${Object.values(tripData.locations)[0]?.destination}`,
+        days: Object.entries(locationsByDay).map(([day, locations]) => ({
+            day: parseInt(day),
+            locations
+        })).sort((a, b) => a.day - b.day),
+        link: tripData.link,
+        totalDays: tripData.days
+    };
+};
 
 const SummaryCard = ({ children, className = "" }) => (
     <div className={`bg-white rounded-lg border shadow-sm p-4 ${className}`}>
@@ -77,31 +104,46 @@ export const TripSummaryPage = () => {
     
     useEffect(() => {
         const loadTripData = async () => {
-            // For routes with only tripId, wait for user data
-            if (!params.id && !user) {
-                console.log('Waiting for user data...');
-                return;
-            }
-
-            const effectiveUserId = getUserId();
-            const effectiveTripId = getTripId();
-
-            if (!effectiveUserId || !effectiveTripId) {
-                console.log('Missing required IDs');
-                return;
-            }
-
             try {
                 setLoading(true);
+                const tripId = params.tripId || params.id;
+
+                // Check if this is a recommendation route (rec1, rec2, etc.)
+                if (tripId?.startsWith('rec')) {
+                    const recData = formatRecommendedTrip(tripId);
+                    if (recData) {
+                        setTripData(recData);
+                        setIsUsingMockData(false);
+                        setLoading(false);
+                        return;
+                    }
+                }
+
+                // If not a recommendation or recommendation not found, proceed with normal flow
+                if (!params.id && !user) {
+                    console.log('Waiting for user data...');
+                    return;
+                }
+
+                const effectiveUserId = getUserId();
+                const effectiveTripId = getTripId();
+
+                if (!effectiveUserId || !effectiveTripId) {
+                    console.log('Missing required IDs');
+                    return;
+                }
+
                 console.log('Using User ID:', effectiveUserId);
                 
                 const { data, error, isUsingMockData: usingMock } = 
                     await fetchTripDataFromFirebase(effectiveUserId, effectiveTripId);
                 
-                setTripData(data || mockData);
+                setTripData(data || formatRecommendedTrip('rec1')); // Fallback to rec1 if no data
                 setIsUsingMockData(usingMock);
             } catch (error) {
                 console.error("Error loading trip data:", error);
+                setTripData(formatRecommendedTrip('rec1')); // Fallback to rec1 on error
+                setIsUsingMockData(true);
             } finally {
                 setLoading(false);
             }

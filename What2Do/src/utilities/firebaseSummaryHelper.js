@@ -27,9 +27,7 @@ export const fetchTripDataFromFirebase = async (userId, tripId) => {
 
       // Convert to the format your component expects
       const formattedData = {
-        title: `Trip to ${
-          Object.values(locations)[0]?.destination || "Unknown"
-        }`,
+        title: rawData.tripName || "Untitled Trip", // Use tripName instead of destination
         days: Object.entries(locationsByDay)
           .map(([day, locs]) => ({
             day: parseInt(day),
