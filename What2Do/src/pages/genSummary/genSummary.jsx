@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
-import { ref, get } from 'firebase/database';
-import { fetchTripDataFromFirebase } from '../../utilities/firebaseSummaryHelper'; 
+import { ref, get, getDatabase } from 'firebase/database';
+import { fetchTripDataFromFirebase, updateTripInFirebase } from '../../utilities/firebaseSummaryHelper'; 
 import { useUser, useAuthState } from '../../utilities/firebase_helper';
 import AuthBanner from '../../pages/LoginPage/AuthBanner';
 import recommendedTrips from '../../assets/parsed_data.json';
@@ -85,6 +85,8 @@ export const TripSummaryPage = () => {
     const [loading, setLoading] = useState(true);
     const [isUsingMockData, setIsUsingMockData] = useState(false);
     const [user] = useAuthState();
+    const [isEditing, setIsEditing] = useState(false);
+    const [editedData, setEditedData] = useState(null);
 
     const getUserId = () => {
         // If we have both id and tripId in the route
@@ -102,55 +104,101 @@ export const TripSummaryPage = () => {
         return params.tripId || params.id; // params.id in this case would be the tripId
     };
     
-    useEffect(() => {
-        const loadTripData = async () => {
-            try {
-                setLoading(true);
-                const tripId = params.tripId || params.id;
+    const loadTripData = async () => {
+        try {
+            setLoading(true);
+            const tripId = params.tripId || params.id;
 
-                // Check if this is a recommendation route (rec1, rec2, etc.)
-                if (tripId?.startsWith('rec')) {
-                    const recData = formatRecommendedTrip(tripId);
-                    if (recData) {
-                        setTripData(recData);
-                        setIsUsingMockData(false);
-                        setLoading(false);
-                        return;
-                    }
-                }
-
-                // If not a recommendation or recommendation not found, proceed with normal flow
-                if (!params.id && !user) {
-                    console.log('Waiting for user data...');
+            // Check if this is a recommendation route (rec1, rec2, etc.)
+            if (tripId?.startsWith('rec')) {
+                const recData = formatRecommendedTrip(tripId);
+                if (recData) {
+                    setTripData(recData);
+                    setIsUsingMockData(false);
+                    setLoading(false);
                     return;
                 }
-
-                const effectiveUserId = getUserId();
-                const effectiveTripId = getTripId();
-
-                if (!effectiveUserId || !effectiveTripId) {
-                    console.log('Missing required IDs');
-                    return;
-                }
-
-                console.log('Using User ID:', effectiveUserId);
-                
-                const { data, error, isUsingMockData: usingMock } = 
-                    await fetchTripDataFromFirebase(effectiveUserId, effectiveTripId);
-                
-                setTripData(data || formatRecommendedTrip('rec1')); // Fallback to rec1 if no data
-                setIsUsingMockData(usingMock);
-            } catch (error) {
-                console.error("Error loading trip data:", error);
-                setTripData(formatRecommendedTrip('rec1')); // Fallback to rec1 on error
-                setIsUsingMockData(true);
-            } finally {
-                setLoading(false);
             }
-        };
 
+            // If not a recommendation or recommendation not found, proceed with normal flow
+            if (!params.id && !user) {
+                console.log('Waiting for user data...');
+                return;
+            }
+
+            const effectiveUserId = getUserId();
+            const effectiveTripId = getTripId();
+
+            if (!effectiveUserId || !effectiveTripId) {
+                console.log('Missing required IDs');
+                return;
+            }
+
+            console.log('Using User ID:', effectiveUserId);
+            
+            const { data, error, isUsingMockData: usingMock } = 
+                await fetchTripDataFromFirebase(effectiveUserId, effectiveTripId);
+            
+            setTripData(data || formatRecommendedTrip('rec1')); // Fallback to rec1 if no data
+            setIsUsingMockData(usingMock);
+        } catch (error) {
+            console.error("Error loading trip data:", error);
+            setTripData(formatRecommendedTrip('rec1')); // Fallback to rec1 on error
+            setIsUsingMockData(true);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        if (tripData) {
+            setEditedData(tripData);
+        }
+    }, [tripData]);
+
+    useEffect(() => {
         loadTripData();
     }, [params, user]);
+
+    const handleSave = async () => {
+        try {
+            const userId = getUserId();
+            const tripId = getTripId();
+            
+            const result = await updateTripInFirebase(userId, tripId, editedData);
+            
+            if (result.success) {
+                setIsEditing(false);
+                // Now loadTripData is accessible
+                await loadTripData();
+            } else {
+                alert('Failed to save changes: ' + result.error);
+            }
+        } catch (error) {
+            console.error("Error saving changes:", error);
+            alert('Failed to save changes');
+        }
+    };
+
+
+    const handleEdit = () => {
+        setIsEditing(true);
+    };
+
+    
+
+    const handleCancel = () => {
+        setEditedData(tripData);
+        setIsEditing(false);
+    };
+
+    const handleLocationChange = (dayIndex, locationIndex, field, value) => {
+        setEditedData(prev => {
+            const newData = { ...prev };
+            newData.days[dayIndex].locations[locationIndex][field] = value;
+            return newData;
+        });
+    };
 
     const handleAddToTrips = () => {
         navigate(`/itinerary/${params.tripId}`);
@@ -197,23 +245,42 @@ export const TripSummaryPage = () => {
                 <div className="space-y-6">
                     {/* Header */}
                     <div className="border-b pb-4">
-                        <h1 className="text-2xl font-bold text-center">{tripData.title}</h1>
+                        <h1 className="text-2xl font-bold text-center">{editedData?.title}</h1>
                     </div>
 
                     {/* Itinerary Summary */}
                     <div className="space-y-4">
-                        {tripData.days.map((day, index) => (
-                            <div key={index} className="border-b last:border-0 pb-4">
+                        {editedData?.days.map((day, dayIndex) => (
+                            <div key={dayIndex} className="border-b last:border-0 pb-4">
                                 <h2 className="font-semibold text-lg mb-2">Day {day.day}</h2>
                                 <ul className="list-disc list-inside space-y-2 text-gray-600">
                                     {day.locations.map((location, locIndex) => (
                                         <li key={locIndex} className="space-y-1">
-                                            <span className="font-medium text-gray-800">
-                                                {location.destination}
-                                            </span>
-                                            <p className="ml-6 text-gray-600">
-                                                {location.description}
-                                            </p>
+                                            {isEditing ? (
+                                                <div className="ml-4 space-y-2">
+                                                    <input
+                                                        type="text"
+                                                        value={location.destination}
+                                                        onChange={(e) => handleLocationChange(dayIndex, locIndex, 'destination', e.target.value)}
+                                                        className="w-full p-2 border rounded"
+                                                    />
+                                                    <textarea
+                                                        value={location.description}
+                                                        onChange={(e) => handleLocationChange(dayIndex, locIndex, 'description', e.target.value)}
+                                                        className="w-full p-2 border rounded"
+                                                        rows="2"
+                                                    />
+                                                </div>
+                                            ) : (
+                                                <>
+                                                    <span className="font-medium text-gray-800">
+                                                        {location.destination}
+                                                    </span>
+                                                    <p className="ml-6 text-gray-600">
+                                                        {location.description}
+                                                    </p>
+                                                </>
+                                            )}
                                         </li>
                                     ))}
                                 </ul>
@@ -223,30 +290,53 @@ export const TripSummaryPage = () => {
 
                     {/* Action Buttons */}
                     <div className="flex flex-col sm:flex-row gap-3 pt-4">
-                        <button
-                            onClick={handleBackHome}
-                            className="flex-1 px-6 py-2 bg-gray-100 text-gray-700 rounded-lg
-                                     hover:bg-gray-200 transition-colors duration-200
-                                     font-medium border border-gray-300"
-                        >
-                            Back to Home
-                        </button>
-                        {/* <button
-                            onClick={handleAddToTrips}
-                            className="flex-1 px-6 py-2 bg-blue-500 text-white rounded-lg
-                                     hover:bg-blue-600 transition-colors duration-200
-                                     font-medium shadow-sm"
-                        >
-                            Back To Edit Itinerary
-                        </button> */}
-                        <button
-                            onClick={handleShare}
-                            className="flex-1 px-6 py-2 bg-green-500 text-white rounded-lg
-                                     hover:bg-green-600 transition-colors duration-200
-                                     font-medium shadow-sm"
-                        >
-                            Share Summary
-                        </button>
+                        {isEditing ? (
+                            <>
+                                <button
+                                    onClick={handleCancel}
+                                    className="flex-1 px-6 py-2 bg-gray-100 text-gray-700 rounded-lg
+                                             hover:bg-gray-200 transition-colors duration-200
+                                             font-medium border border-gray-300"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    onClick={handleSave}
+                                    className="flex-1 px-6 py-2 bg-green-500 text-white rounded-lg
+                                             hover:bg-green-600 transition-colors duration-200
+                                             font-medium shadow-sm"
+                                >
+                                    Save Changes
+                                </button>
+                            </>
+                        ) : (
+                            <>
+                                <button
+                                    onClick={handleBackHome}
+                                    className="flex-1 px-6 py-2 bg-gray-100 text-gray-700 rounded-lg
+                                             hover:bg-gray-200 transition-colors duration-200
+                                             font-medium border border-gray-300"
+                                >
+                                    Back to Home
+                                </button>
+                                <button
+                                    onClick={handleEdit}
+                                    className="flex-1 px-6 py-2 bg-blue-500 text-white rounded-lg
+                                             hover:bg-blue-600 transition-colors duration-200
+                                             font-medium shadow-sm"
+                                >
+                                    Edit
+                                </button>
+                                <button
+                                    onClick={handleShare}
+                                    className="flex-1 px-6 py-2 bg-green-500 text-white rounded-lg
+                                             hover:bg-green-600 transition-colors duration-200
+                                             font-medium shadow-sm"
+                                >
+                                    Share Summary
+                                </button>
+                            </>
+                        )}
                     </div>
                 </div>
             </SummaryCard>
