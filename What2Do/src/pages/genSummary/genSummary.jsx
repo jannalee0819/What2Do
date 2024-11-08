@@ -231,14 +231,14 @@ export const TripSummaryPage = () => {
                         >
                             Back to Home
                         </button>
-                        <button
+                        {/* <button
                             onClick={handleAddToTrips}
                             className="flex-1 px-6 py-2 bg-blue-500 text-white rounded-lg
                                      hover:bg-blue-600 transition-colors duration-200
                                      font-medium shadow-sm"
                         >
                             Back To Edit Itinerary
-                        </button>
+                        </button> */}
                         <button
                             onClick={handleShare}
                             className="flex-1 px-6 py-2 bg-green-500 text-white rounded-lg
