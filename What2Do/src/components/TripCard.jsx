@@ -36,10 +36,6 @@ export function TripCard({ trip, tripId, rec, onDelete}) {
             <div className="bg-white/20 rounded-lg px-3 py-1 text-white text-sm font-medium">
               {trip.days} Days
             </div>
-            <button onClick={onDelete}
-             className="group rounded-md p-1 text-white hover:bg-white/20">
-              <Trash className="w-4 h-4" />
-          </button>
           </div>
         </div>
         <CardHeader className="pt-4">
