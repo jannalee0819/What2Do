@@ -29,9 +29,9 @@ export const getProfile = async (uid, name) => {
 }
 
 // return trip
-export const getTrip = async (uid, tripName) => {
+export const getTrip = async (uid, tripId) => {
     try {
-        const tripRef = ref(db, `users/${uid}/trips/${tripName}`);
+        const tripRef = ref(db, `users/${uid}/trips/${tripId}`);
         const tripSnapshot = await get(tripRef);
         
         if (!tripSnapshot.exists()) {
