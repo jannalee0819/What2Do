@@ -1,7 +1,7 @@
 // utilities/urlParser.js
 
 import axios from 'axios';
-import * as cheerio from 'cheerio'; // Changed this line
+import * as cheerio from 'cheerio';
 import { addTrip } from './firebase_helper';
 
 const cleanText = (text) => {
@@ -44,11 +44,17 @@ const extractMainContent = ($) => {
 
 const parseUrl = async (url) => {
   try {
-    const response = await axios.get(url, {
+    // Use a CORS proxy service
+    const corsProxy = 'https://corsproxy.io/?' + encodeURIComponent(url);
+    // Or alternatively: const corsProxy = `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
+    
+    const response = await axios.get(corsProxy, {
       headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+        'Accept-Language': 'en-US,en;q=0.5',
       }
     });
+    
     const $ = cheerio.load(response.data);
     const content = extractMainContent($);
 
@@ -58,6 +64,7 @@ const parseUrl = async (url) => {
 
     return content;
   } catch (error) {
+    console.error('URL parsing error:', error);
     throw new Error(`Failed to parse URL: ${error.message}`);
   }
 };
@@ -103,13 +110,14 @@ const processWithGPT = async (content, numberOfDays) => {
 
     // Convert to Firebase format
     const firebaseData = {
-      link: content.substring(0, 100) + "...", // Store a preview of the content
+      link: url, // Store the original URL
       locations: parsedResponse.itinerary.map(item => ({
         day: parseInt(item.day),
         description: item.description,
         destination: item.location
       })),
-      days: numberOfDays
+      days: numberOfDays,
+      tripName: parsedResponse.tripName
     };
 
     // Store in Firebase
@@ -117,6 +125,7 @@ const processWithGPT = async (content, numberOfDays) => {
 
     return parsedResponse;
   } catch (error) {
+    console.error('GPT processing error:', error);
     throw new Error('Failed to process with GPT: ' + error.message);
   }
 };
@@ -127,6 +136,7 @@ export const processArticleUrl = async (url, numberOfDays = 3) => {
     const itinerary = await processWithGPT(content, numberOfDays);
     return itinerary;
   } catch (error) {
+    console.error('Article processing error:', error);
     throw new Error(`Error processing article: ${error.message}`);
   }
 };

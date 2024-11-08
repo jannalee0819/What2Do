@@ -12,7 +12,20 @@ export function UrlUpload() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // Basic URL validation
     if (!url.trim()) {
+      setError('Please enter a URL');
+      return;
+    }
+
+    try {
+      const urlObj = new URL(url);
+      if (!['http:', 'https:'].includes(urlObj.protocol)) {
+        setError('Please enter a valid http or https URL');
+        return;
+      }
+    } catch (err) {
       setError('Please enter a valid URL');
       return;
     }
@@ -22,10 +35,16 @@ export function UrlUpload() {
 
     try {
       const result = await processArticleUrl(url, parseInt(days));
-      // Assuming you want to redirect to the trip view or profile after successful processing
-      navigate('/profile');
+      console.log('Processing result:', result); // For debugging
+      navigate('/profile', { 
+        state: { 
+          success: true, 
+          message: 'Trip created successfully!' 
+        } 
+      });
     } catch (err) {
-      setError(err.message || 'Failed to process URL. Please try again.');
+      console.error('Error processing URL:', err);
+      setError(err.message || 'Failed to process the article. Please try a different URL or try again later.');
     } finally {
       setLoading(false);
     }
