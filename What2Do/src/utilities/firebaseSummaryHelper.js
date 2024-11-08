@@ -1,9 +1,11 @@
 import { ref, get } from "firebase/database";
 import { firebase } from "./firebase";
+import { getDatabase } from "firebase/database";
 
 export const fetchTripDataFromFirebase = async (userId, tripId) => {
   try {
-    const tripRef = ref(firebase, `users/${userId}/trips/${tripId}`);
+    const db = getDatabase(firebase);
+    const tripRef = ref(db, `users/${userId}/trips/${tripId}`);
     const snapshot = await get(tripRef);
 
     if (snapshot.exists()) {
