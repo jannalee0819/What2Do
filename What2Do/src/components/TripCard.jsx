@@ -25,7 +25,7 @@ export function TripCard({ trip, tripId, rec }) {
 
   const handleViewItinerary = () => {
     console.log('navigating...')
-    navigate(`/itinerary/${tripId}`);
+    navigate(`/summary/${tripId}`);
   };
 
   return (
