@@ -153,7 +153,7 @@ export const TripSummaryPage = () => {
     }, [params, user]);
 
     const handleAddToTrips = () => {
-        navigate('/trips');
+        navigate(`/itinerary/${params.tripId}`);
     };
 
     const handleShare = () => {
@@ -237,7 +237,7 @@ export const TripSummaryPage = () => {
                                      hover:bg-blue-600 transition-colors duration-200
                                      font-medium shadow-sm"
                         >
-                            Add to My Trips
+                            Back To Edit Itinerary
                         </button>
                         <button
                             onClick={handleShare}
