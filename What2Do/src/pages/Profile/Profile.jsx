@@ -1,15 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import { TripCard } from '../../components/TripCard';
-import { Plus, LogOut, Star, MapPin } from "lucide-react";
+import { Plus, LogOut, Star, MapPin, FileUp, PenSquare } from "lucide-react";
 import { signOut, useAuthState } from "../../utilities/firebase_helper";
 import { useNavigate, Link } from "react-router-dom";
 import { getProfile } from '../../utilities/fetchProfileData';
 
-export function Profile () {
-  const [data, setData] = useState({ trips: {}}); // initialize empty
-  const [recs, setRecs] = useState({ trips: {} }); // initialize empty
+export function Profile() {
+  const [data, setData] = useState({ trips: {} });
+  const [recs, setRecs] = useState({ trips: {} });
   const [user, loading] = useAuthState();
-  const [isInitialized, setIsInitialized] = useState(false); 
+  const [isInitialized, setIsInitialized] = useState(false);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -27,6 +28,15 @@ export function Profile () {
       }
     };
     initializeProfile();
+
+    // Close dropdown when clicking outside
+    const handleClickOutside = (event) => {
+      if (!event.target.closest('.dropdown-container')) {
+        setIsDropdownOpen(false);
+      }
+    };
+    document.addEventListener('click', handleClickOutside);
+    return () => document.removeEventListener('click', handleClickOutside);
   }, [user, loading, isInitialized]);
 
   const handleSignOut = async () => {
@@ -82,7 +92,7 @@ export function Profile () {
               <div className="flex gap-2 sm:gap-4">
                 {Object.entries(recs.trips).map(([tripId, tripData]) => (
                   <div key={tripId} className="w-80 flex-shrink-0">
-                    <TripCard trip={tripData} tripId={tripId} rec={1} />
+                    <TripCard trip={tripData} rec={1} tripId={tripId} />
                   </div>
                 ))}
               </div>
@@ -97,15 +107,43 @@ export function Profile () {
               <MapPin className="w-5 h-5 text-blue-600" />
               <h2 className="text-lg font-semibold text-gray-700">My Trips</h2>
             </div>
-            <Link to="../add" relative="path" className="flex items-center gap-2 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white font-medium rounded-xl shadow-sm transition-all hover:shadow-md">
-              Create Trip
-              <Plus className="w-4 h-4" strokeWidth={2.6} />
-            </Link>
+            <div className="dropdown-container relative">
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsDropdownOpen(!isDropdownOpen);
+                }}
+                className="flex items-center gap-2 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white font-medium rounded-xl shadow-sm transition-all hover:shadow-md"
+              >
+                Create Trip
+                <Plus className="w-4 h-4" strokeWidth={2.6} />
+              </button>
+              {isDropdownOpen && (
+                <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden z-50">
+                <Link
+                  to="/add"
+                  className="flex items-center gap-2 px-4 py-3 text-gray-700 hover:bg-gray-50 transition-colors"
+                  onClick={() => setIsDropdownOpen(false)}
+                >
+                  <PenSquare className="w-4 h-4" />
+                  <span>Manual Input</span>
+                </Link>
+                <Link
+                  to="/upload"
+                  className="flex items-center gap-2 px-4 py-3 text-gray-700 hover:bg-gray-50 transition-colors"
+                  onClick={() => setIsDropdownOpen(false)}
+                >
+                  <FileUp className="w-4 h-4" />
+                  <span>URL Upload</span>
+                </Link>
+              </div>
+              )}
+            </div>
           </div>
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
             {Object.entries(data.trips).map(([tripId, tripData]) => (
               <div key={tripId} className="transform transition-all hover:scale-[1.02]">
-                <TripCard trip={tripData} tripId={tripId}/>
+                <TripCard trip={tripData} tripId={tripId} />
               </div>
             ))}
           </div>
@@ -113,6 +151,6 @@ export function Profile () {
       </div>
     </div>
   );
-};
+}
 
 export default Profile;
