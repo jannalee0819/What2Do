@@ -1,193 +1,74 @@
 import React, { useState, useEffect } from 'react';
-import { useLocation, useNavigate, useParams } from 'react-router-dom';
-import { ref, get, getDatabase } from 'firebase/database';
-import { fetchTripDataFromFirebase, updateTripInFirebase } from '../../utilities/firebaseSummaryHelper'; 
-import { useUser, useAuthState } from '../../utilities/firebase_helper';
-import AuthBanner from '../../pages/LoginPage/AuthBanner';
-import recommendedTrips from '../../assets/parsed_data.json';
-
-const formatRecommendedTrip = (recId) => {
-    const tripData = recommendedTrips.users.recommendations.trips[recId];
-    if (!tripData) return null;
-
-    const locationsByDay = {};
-    Object.values(tripData.locations).forEach(location => {
-        if (!locationsByDay[location.day]) {
-            locationsByDay[location.day] = [];
-        }
-        locationsByDay[location.day].push({
-            destination: location.destination,
-            description: location.description
-        });
-    });
-
-    return {
-        title: `Trip to ${Object.values(tripData.locations)[0]?.destination}`,
-        days: Object.entries(locationsByDay).map(([day, locations]) => ({
-            day: parseInt(day),
-            locations
-        })).sort((a, b) => a.day - b.day),
-        link: tripData.link,
-        totalDays: tripData.days
-    };
-};
+import { useNavigate, useParams } from 'react-router-dom';
+import { useAuthState } from '../../utilities/firebase_helper';
+import { getTrip } from '../../utilities/fetchProfileData';
+import {updateTripInFirebase} from '../../utilities/firebaseSummaryHelper';
 
 const SummaryCard = ({ children, className = "" }) => (
     <div className={`bg-white rounded-lg border shadow-sm p-4 ${className}`}>
         {children}
     </div>
 );
-const mockData = {
-    title: "Northwestern Campus Tour",
-    days: [
-        {
-            day: 1,
-            locations: [
-                {
-                    destination: "Evanston Campus",
-                    description: "9:00 AM - 12:00 PM: Tour the beautiful lakeside campus including University Library and The Rock"
-                },
-                {
-                    destination: "Downtown Evanston",
-                    description: "2:00 PM - 5:00 PM: Explore local restaurants and shops on Davis Street"
-                }
-            ]
-        },
-        {
-            day: 2,
-            locations: [
-                {
-                    destination: "Lakefill",
-                    description: "10:00 AM - 1:00 PM: Walk along Lake Michigan and visit the nature areas"
-                },
-                {
-                    destination: "Ryan Field",
-                    description: "3:00 PM - 5:00 PM: Check out the football stadium and athletic facilities"
-                }
-            ]
-        },
-        {
-            day: 3,
-            locations: [
-                {
-                    destination: "Technological Institute",
-                    description: "11:00 AM - 2:00 PM: Visit the engineering buildings and research labs"
-                }
-            ]
-        }
-    ]
-};
 
-export const TripSummaryPage = () => {
+export const TripSummaryPage = ({ isRec }) => {
     const navigate = useNavigate();
     const params = useParams();
+    const [user] = useAuthState();
     const [tripData, setTripData] = useState(null);
     const [loading, setLoading] = useState(true);
-    const [isUsingMockData, setIsUsingMockData] = useState(false);
-    const [user] = useAuthState();
     const [isEditing, setIsEditing] = useState(false);
-    const [canEdit, setCanEdit] = useState(true)
     const [editedData, setEditedData] = useState(null);
+    console.log(isRec)
 
-    const getUserId = () => {
-        // If we have both id and tripId in the route
-        if (params.id && params.tripId) {
-            return params.id; // Use the provided userId
-        }
-        // If we only have tripId in the route
-        if (params.tripId && !params.id) {
-            return user?.uid; // Use the authenticated user's uid
-        }
-        return null;
-    };
-
-    const getTripId = () => {
-        return params.tripId || params.id; // params.id in this case would be the tripId
-    };
-    
     const loadTripData = async () => {
         try {
             setLoading(true);
-            const tripId = params.tripId || params.id;
+            let data;
 
-            // Check if this is a recommendation route (rec1, rec2, etc.)
-            if (tripId?.startsWith('rec')) {
-                const recData = formatRecommendedTrip(tripId);
-                if (recData) {
-                    setTripData(recData);
-                    setIsUsingMockData(false);
+            if (isRec) {
+                console.log('is rec')
+                // For recommended trips, use "recommended" as userId
+                data = await getTrip("recommendations", params.tripId);
+            } else {
+                // For regular trips, determine the correct userId
+                const effectiveUserId = params.id || user?.uid;
+                const effectiveTripId = params.tripId || params.id;
+
+                if (!effectiveUserId || !effectiveTripId) {
+                    console.error('Missing required IDs');
                     setLoading(false);
-                    setCanEdit(false)
                     return;
                 }
+
+                data = await getTrip(effectiveUserId, effectiveTripId);
             }
 
-            // If not a recommendation or recommendation not found, proceed with normal flow
-            if (!params.id && !user) {
-                console.log('Waiting for user data...');
-                return;
-            }
-
-            const effectiveUserId = getUserId();
-            const effectiveTripId = getTripId();
-
-            if (!effectiveUserId || !effectiveTripId) {
-                console.log('Missing required IDs');
-                return;
-            }
-
-            console.log('Using User ID:', effectiveUserId);
-            
-            const { data, error, isUsingMockData: usingMock } = 
-                await fetchTripDataFromFirebase(effectiveUserId, effectiveTripId);
-            
-            setTripData(data || formatRecommendedTrip('rec1')); // Fallback to rec1 if no data
-            setIsUsingMockData(usingMock);
+            setTripData(data);
+            setEditedData(data);
         } catch (error) {
             console.error("Error loading trip data:", error);
-            setTripData(formatRecommendedTrip('rec1')); // Fallback to rec1 on error
-            setIsUsingMockData(true);
         } finally {
             setLoading(false);
         }
     };
 
     useEffect(() => {
-        if (tripData) {
-            setEditedData(tripData);
-        }
-    }, [tripData]);
-
-    useEffect(() => {
         loadTripData();
-    }, [params, user]);
+    }, [params, user, isRec]);
 
     const handleSave = async () => {
         try {
-            const userId = getUserId();
-            const tripId = getTripId();
+            const userId = params.id || user?.uid;
+            const tripId = params.tripId || params.id;
             
-            const result = await updateTripInFirebase(userId, tripId, editedData);
-            
-            if (result.success) {
-                setIsEditing(false);
-                // Now loadTripData is accessible
-                await loadTripData();
-            } else {
-                alert('Failed to save changes: ' + result.error);
-            }
+            await updateTripInFirebase(userId, tripId, editedData);
+            setIsEditing(false);
+            await loadTripData();
         } catch (error) {
             console.error("Error saving changes:", error);
             alert('Failed to save changes');
         }
     };
-
-
-    const handleEdit = () => {
-        setIsEditing(true);
-    };
-
-    
 
     const handleCancel = () => {
         setEditedData(tripData);
@@ -197,78 +78,91 @@ export const TripSummaryPage = () => {
     const handleLocationChange = (dayIndex, locationIndex, field, value) => {
         setEditedData(prev => {
             const newData = { ...prev };
-            newData.days[dayIndex].locations[locationIndex][field] = value;
+            const locationKey = Object.keys(newData.locations).find(key => 
+                newData.locations[key].day === dayIndex && 
+                locationIndex === Object.values(newData.locations)
+                    .filter(loc => loc.day === dayIndex)
+                    .indexOf(newData.locations[key])
+            );
+            
+            if (locationKey) {
+                newData.locations[locationKey][field] = value;
+            }
             return newData;
         });
     };
 
-    const handleAddToTrips = () => {
-        navigate(`/itinerary/${params.tripId}`);
-    };
-
     const handleShare = () => {
-        // Get the base URL (e.g., "https://yourapp.com")
         const baseUrl = window.location.origin;
-        
-        // Get the effective user ID (either from params or current user)
-        const effectiveUserId = params.id || user?.uid;
-        const effectiveTripId = params.tripId || params.id; // depending on route pattern
-    
-        if (effectiveUserId && effectiveTripId) {
-            // Construct the sharing URL with the correct format
-            const shareUrl = `${baseUrl}/summary/${effectiveUserId}/${effectiveTripId}`;
-            
-            navigator.clipboard.writeText(shareUrl);
-            alert('Link copied to clipboard!');
+        let shareUrl;
+
+        if (isRec) {
+            shareUrl = `${baseUrl}/summary/${params.tripId}`;
         } else {
-            alert('Unable to generate sharing link');
+            const effectiveUserId = params.id || user?.uid;
+            const effectiveTripId = params.tripId || params.id;
+            shareUrl = `${baseUrl}/summary/${effectiveUserId}/${effectiveTripId}`;
         }
+        
+        navigator.clipboard.writeText(shareUrl);
+        alert('Link copied to clipboard!');
     };
 
-    const handleBackHome = () => {
-        navigate('/');
+    const groupLocationsByDay = (locations) => {
+        const groupedByDay = {};
+        Object.entries(locations || {}).forEach(([key, location]) => {
+            const day = location.day;
+            if (!groupedByDay[day]) {
+                groupedByDay[day] = [];
+            }
+            groupedByDay[day].push(location);
+        });
+        return Object.entries(groupedByDay).sort(([a], [b]) => Number(a) - Number(b));
     };
 
     if (loading) {
-        return <div className="flex justify-center items-center min-h-screen">
-            <div className="text-xl">Loading trip details...</div>
-        </div>;
+        return (
+            <div className="flex justify-center items-center min-h-screen">
+                <div className="text-xl">Loading trip details...</div>
+            </div>
+        );
     }
 
     if (!tripData) {
-        return <div className="flex justify-center items-center min-h-screen">
-            <div className="text-xl">Trip not found</div>
-        </div>;
+        return (
+            <div className="flex justify-center items-center min-h-screen">
+                <div className="text-xl">Trip not found</div>
+            </div>
+        );
     }
-
     return (
         <div className="max-w-2xl mx-auto p-6 space-y-6">
             <SummaryCard>
                 <div className="space-y-6">
                     {/* Header */}
                     <div className="border-b pb-4">
-                        <h1 className="text-2xl font-bold text-center">{editedData?.title}</h1>
+                        <h1 className="text-2xl font-bold text-center">{editedData?.tripName}</h1>
                     </div>
 
                     {/* Itinerary Summary */}
                     <div className="space-y-4">
-                        {editedData?.days.map((day, dayIndex) => (
-                            <div key={dayIndex} className="border-b last:border-0 pb-4">
-                                <h2 className="font-semibold text-lg mb-2">Day {day.day}</h2>
+                        {editedData && groupLocationsByDay(editedData.locations).map(([day, locations]) => (
+                            <div key={day} className="border-b last:border-0 pb-4">
+                                <h2 className="font-semibold text-lg mb-2">Day {day}</h2>
                                 <ul className="list-disc list-inside space-y-2 text-gray-600">
-                                    {day.locations.map((location, locIndex) => (
+                                    {locations.map((location, locIndex) => (
                                         <li key={locIndex} className="space-y-1">
                                             {isEditing ? (
                                                 <div className="ml-4 space-y-2">
                                                     <input
                                                         type="text"
                                                         value={location.destination}
-                                                        onChange={(e) => handleLocationChange(dayIndex, locIndex, 'destination', e.target.value)}
+                                                        onChange={(e) => handleLocationChange(location.day, locIndex, 'destination', e.target.value)}
                                                         className="w-full p-2 border rounded"
                                                     />
                                                     <textarea
                                                         value={location.description}
-                                                        onChange={(e) => handleLocationChange(dayIndex, locIndex, 'description', e.target.value)}
+                                                        onChange={(e) => handleLocationChange(location.day, locIndex, 'description', e.target.value)}
                                                         className="w-full p-2 border rounded"
                                                         rows="2"
                                                     />
@@ -314,21 +208,23 @@ export const TripSummaryPage = () => {
                         ) : (
                             <>
                                 <button
-                                    onClick={handleBackHome}
+                                    onClick={() => navigate('/')}
                                     className="flex-1 px-6 py-2 bg-gray-100 text-gray-700 rounded-lg
                                              hover:bg-gray-200 transition-colors duration-200
                                              font-medium border border-gray-300"
                                 >
                                     Back to Home
                                 </button>
-                                {canEdit && <button
-                                    onClick={handleEdit}
-                                    className="flex-1 px-6 py-2 bg-blue-500 text-white rounded-lg
-                                             hover:bg-blue-600 transition-colors duration-200
-                                             font-medium shadow-sm"
-                                >
-                                    Edit
-                                </button>}
+                                {!isRec && (
+                                    <button
+                                        onClick={() => setIsEditing(true)}
+                                        className="flex-1 px-6 py-2 bg-blue-500 text-white rounded-lg
+                                                 hover:bg-blue-600 transition-colors duration-200
+                                                 font-medium shadow-sm"
+                                    >
+                                        Edit
+                                    </button>
+                                )}
                                 <button
                                     onClick={handleShare}
                                     className="flex-1 px-6 py-2 bg-green-500 text-white rounded-lg
@@ -345,3 +241,5 @@ export const TripSummaryPage = () => {
         </div>
     );
 };
+
+export default TripSummaryPage;

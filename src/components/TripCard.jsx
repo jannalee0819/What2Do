@@ -1,5 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuthState } from '../utilities/firebase_helper';
 import { 
     Card, 
     CardHeader, 
@@ -12,6 +13,8 @@ import { MapPin, Calendar, ArrowRight, Clock, Trash} from "lucide-react";
 
 export function TripCard({ trip, tripId, rec, onDelete}) {
   const navigate = useNavigate()
+  const [user] = useAuthState();  // Add this line
+
   const getRandomGradient = () => {
     const gradients = [
       'from-blue-500 to-purple-500',
@@ -25,7 +28,12 @@ export function TripCard({ trip, tripId, rec, onDelete}) {
 
   const handleViewItinerary = () => {
     console.log('navigating...')
-    navigate(`/summary/${tripId}`);
+    if (rec) {
+      navigate(`/summary/${tripId}`);  // For recommended trips
+    } else {
+      const userId = user?.uid;  // You'll need to pass user as a prop or get it from context/auth state
+      navigate(`/summary/${userId}/${tripId}`);  // For user trips
+    }
   };
 
   return (

@@ -52,30 +52,25 @@ export const updateTripInFirebase = async (userId, tripId, editedData) => {
   try {
     const db = getDatabase(firebase);
     const updates = {};
+    
+    // Update trip name if it exists
+    if (editedData.tripName) {
+      updates[`users/${userId}/trips/${tripId}/tripName`] = editedData.tripName;
+    }
 
-    editedData.days.forEach((day) => {
-      day.locations.forEach((location) => {
-        // Find the location key in the original data structure
-        const locationKey = Object.keys(editedData.locations).find(
-          (key) =>
-            editedData.locations[key].destination ===
-            location.originalDestination
-        );
-        if (locationKey) {
-          updates[
-            `users/${userId}/trips/${tripId}/locations/${locationKey}/destination`
-          ] = location.destination;
-          updates[
-            `users/${userId}/trips/${tripId}/locations/${locationKey}/description`
-          ] = location.description;
-        }
-      });
+    // Update locations directly using the locations object structure
+    Object.entries(editedData.locations || {}).forEach(([locationKey, location]) => {
+      updates[`users/${userId}/trips/${tripId}/locations/${locationKey}/destination`] = location.destination;
+      updates[`users/${userId}/trips/${tripId}/locations/${locationKey}/description`] = location.description;
+      updates[`users/${userId}/trips/${tripId}/locations/${locationKey}/day`] = location.day;
     });
 
+    // Perform the update
     await update(ref(db), updates);
-    return { success: true, error: null };
+    
+    return true;
   } catch (error) {
-    console.error("Error updating trip:", error);
-    return { success: false, error: error.message };
+    console.error('Error updating trip in Firebase:', error);
+    throw error;
   }
 };

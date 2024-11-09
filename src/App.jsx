@@ -30,9 +30,8 @@ const App = () => {
             path="/edit/:id"
             element={<EditTrip trips={trips} onUpdateTrip={updateTrip} />}
           />
-          {/* <Route path="/itinerary" element={<TripItinerary />} /> */}
-          <Route path="/summary/:id/:tripId" element={<TripSummaryPage />} />
-          <Route path="/summary/:tripId" element={<TripSummaryPage />} />
+          <Route path="/summary/:uid/:tripId" element={<TripSummaryPage isRec={false}/>} />
+          <Route path="/summary/:tripId" element={<TripSummaryPage isRec={true} />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/upload" element={<UrlUpload />} /> {/* Add this route */}
         </Routes>
