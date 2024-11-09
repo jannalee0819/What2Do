@@ -18,7 +18,6 @@ export const TripSummaryPage = ({ isRec }) => {
     const [loading, setLoading] = useState(true);
     const [isEditing, setIsEditing] = useState(false);
     const [editedData, setEditedData] = useState(null);
-    console.log(isRec)
 
     const loadTripData = async () => {
         try {
@@ -26,7 +25,6 @@ export const TripSummaryPage = ({ isRec }) => {
             let data;
 
             if (isRec) {
-                console.log('is rec')
                 // For recommended trips, use "recommended" as userId
                 data = await getTrip("recommendations", params.tripId);
             } else {
